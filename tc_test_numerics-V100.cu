@@ -36,7 +36,6 @@ void print_matrix (half *a,
   if (bycols) {
     for (i=0; i<m; i++) {
       for (j=0; j<n; j++)
-        // printf("%08X ", (unsigned int)(a[j*n+i]));
         std::cout << __half2float(a[j*n+i]) << " ";
       std::cout << std::endl;
     }
@@ -44,16 +43,12 @@ void print_matrix (half *a,
   } else {
     for (i=0; i<m; i++ ) {
       for (j=0; j<n; j++)
-        // printf("%08X ", (unsigned int)(a[i*m+j]));
         std::cout << __half2float(a[i*m+j]) << " ";
       std::cout  << std::endl;
     }
     std::cout << std::endl;
    }
 }
-
-
-
 
 
 /****************************************************
@@ -113,9 +108,6 @@ void wmma_init_run (half *h_a, half *h_b, returntype *h_c,
 }
 
 
-
-
-
 /**********************
  * Printing functions *
  **********************/
@@ -142,9 +134,6 @@ void printfooter(FILE *outfile) {
 }
 
 
-
-
-
 /***************
  * EXPERIMENTS *
  ***************/
@@ -152,7 +141,7 @@ int main(int argc, char** argv){
 
   // Declare pointers and allocate memory.
   half *h_a, *h_b, *h16_c, *d16_a, *d16_b, *d16_c,
-    minsubnormal16 = __float2half(ldexp(1.,-24)), // smallest subnormal binary16
+    minsubnormal16 = __float2half(ldexp(1., -24)), // smallest subnorm. binary16
     belowone16 = __float2half(1.-ldexp(1, -11)),
     zero16 = __float2half(0.),
     one16 = __float2half(1.),
@@ -160,14 +149,14 @@ int main(int argc, char** argv){
     two16 = __float2half(2.),
     four16 = __float2half(4.);
   float *d_c, *h_c,
-    minsubnormal32 = ldexp(1.,-149), // smallest subnormal binary32
-    belowone = nextafterf(1.,0.) ,   // largest float smaller than 1.0
+    minsubnormal32 = ldexp(1., -149), // smallest subnormal binary32
+    belowone = nextafterf(1., 0.) ,   // largest float smaller than 1.0
     gapbelowone = 1. - belowone,
-    aboveone = nextafterf(1.,2.),    // smallest float larger than 1.0
-    belowtwo = 2. - ldexp(1.,-23);   // largest float smaller than 2.0
+    aboveone = nextafterf(1., 2.),    // smallest float larger than 1.0
+    belowtwo = 2. - ldexp(1., -23);   // largest float smaller than 2.0
 
-  assert(belowone == 1. - ldexp(1.,-24));
-  assert(aboveone == 1. + ldexp(1.,-23));
+  assert(belowone == 1. - ldexp(1., -24));
+  assert(aboveone == 1. + ldexp(1., -23));
 
   h_a = new half[16*16];
   h_b = new half[16*16];
@@ -182,31 +171,27 @@ int main(int argc, char** argv){
   FILE *outfile = stdout;
   bool pass;
 
-
-
-
-
-  printheader(outfile, "A. Support for subnormal numbers");// ;
+  printheader(outfile, "A. Support for subnormal numbers");
 
   printitem(outfile, "*) Binary16 subnormals in input (binary16 mode)");
   host_reset(h_a, h_b, h16_c);
   h_a[0] = minsubnormal16;
   h_b[0] = four16;
   wmma_init_run(h_a, h_b, h16_c, d16_a, d16_b, d16_c, false);
-  printpass(outfile, __half2float(h16_c[0])==ldexp(1.,-22));
+  printpass(outfile, __half2float(h16_c[0]) == ldexp(1., -22));
 
   printitem(outfile, "*) Binary16 subnormals in input (binary32 mode)");
   host_reset(h_a, h_b, h_c);
   h_a[0] = minsubnormal16;
   h_b[0] = four16;
   wmma_init_run(h_a, h_b, h_c, d16_a, d16_b, d_c, false);
-  printpass(outfile, h_c[0]==ldexp(1.,-22));
+  printpass(outfile, h_c[0] == ldexp(1., -22));
 
   printitem(outfile, "*) Binary32 subnormals in input");
   host_reset(h_a, h_b, h_c);
   h_c[0] = minsubnormal32;
   wmma_init_run (h_a, h_b, h_c, d16_a, d16_b, d_c, false);
-  printpass(outfile, h_c[0]==minsubnormal32);
+  printpass(outfile, h_c[0] == minsubnormal32);
 
   printitem(outfile, "*) Binary16 subnormals in output (binary16 mode)");
   host_reset(h_a, h_b, h16_c);
@@ -236,10 +221,6 @@ int main(int argc, char** argv){
 
   printfooter(outfile);
 
-
-
-
-
   printheader(outfile, "B. Accuracy of the dot products ");// ;
 
   printitem(outfile, "*) Products are computed exactly ");
@@ -247,7 +228,7 @@ int main(int argc, char** argv){
   h_a[0] = belowone16;
   h_b[0] = belowone16;
   wmma_init_run (h_a, h_b, h_c, d16_a, d16_b, d_c, false);
-  pass = (h_c[0] == 1-ldexp(1, -10)+ldexp(1, -22));
+  pass = (h_c[0] == 1 - ldexp(1, -10) + ldexp(1, -22));
   size_t i,j;
   for (i=0; i<4; i++) {
     h_a[i] = belowone16;
@@ -255,7 +236,7 @@ int main(int argc, char** argv){
   }
   h_c[0] = zero16;
   wmma_init_run (h_a, h_b, h_c, d16_a, d16_b, d_c, false);
-  pass = (h_c[0] == (4*(1-ldexp(1, -10)+ldexp(1, -22))));
+  pass = (h_c[0] == (4 * (1 - ldexp(1, -10) + ldexp(1, -22))));
   printpass(outfile, pass);
 
   printitem(outfile, "*) Products exact (binary16 mode)");
@@ -299,10 +280,6 @@ int main(int argc, char** argv){
 
   printfooter(outfile);
 
-
-
-
-
   printheader(outfile, "C. Rounding modes in tensor core computations ");
 
   printitem(outfile, "*) Round-down for positive values ");
@@ -311,7 +288,7 @@ int main(int argc, char** argv){
     h_a[i] = one16;
   }
   h_b[0] = __float2half(2.);
-  h_b[1] = __float2half(ldexp(1.,-23)+ldexp(1.,-24));
+  h_b[1] = __float2half(ldexp(1., -23) + ldexp(1., -24));
   wmma_init_run (h_a, h_b, h_c, d16_a, d16_b, d_c, false);
   printpass(outfile, h_c[0] == 2.);
 
@@ -321,7 +298,7 @@ int main(int argc, char** argv){
     h_a[i] = one16;
   }
   h_b[0] = __float2half(-2.);
-  h_b[1] = __float2half(-ldexp(1.,-23)-ldexp(1.,-24));
+  h_b[1] = __float2half(-ldexp(1., -23) - ldexp(1., -24));
   wmma_init_run (h_a, h_b, h_c, d16_a, d16_b, d_c, false);
   printpass(outfile, h_c[0] == -2.);
 
@@ -337,10 +314,6 @@ int main(int argc, char** argv){
 
   printfooter(outfile);
 
-
-
-
-
   printheader(outfile, "D. Features of the accumulator");
 
   printitem(outfile, "1) Extra bits in the significand alignment");
@@ -349,9 +322,9 @@ int main(int argc, char** argv){
   h_b[0] = one16;
   h_c[0] = -belowone;
   wmma_init_run (h_a, h_b, h_c, d16_a, d16_b, d_c, false);
-  assert(1 - belowone == ldexp(1.,-24));
-  assert(gapbelowone == ldexp(1.,-24));
-  printpass(outfile, h_c[0] == ldexp(1.,-23));
+  assert(1 - belowone == ldexp(1., -24));
+  assert(gapbelowone == ldexp(1., -24));
+  printpass(outfile, h_c[0] == ldexp(1., -23));
 
   printitem(outfile, "2) Normalization in addition");
   host_reset(h_a, h_b, h_c);
@@ -361,7 +334,7 @@ int main(int argc, char** argv){
   }
   h_c[0] = 1. - ldexp(1.,-24);
   wmma_init_run (h_a, h_b, h_c, d16_a, d16_b, d_c, false);
-  pass = h_c[0] == 1.+ldexp(1.,-23);
+  pass = h_c[0] == 1. + ldexp(1., -23);
   printpass(outfile, pass);
 
   printitem(outfile, "3) Normalization in subtraction");
@@ -369,10 +342,10 @@ int main(int argc, char** argv){
   h_a[0] = one16;
   h_a[1] = one16;
   h_b[0] = one16;
-  h_b[1] = __float2half(-ldexp(1.,-24));
-  h_c[0] = -1. + ldexp(1.,-24);
+  h_b[1] = __float2half(-ldexp(1., -24));
+  h_c[0] = -1. + ldexp(1., -24);
   wmma_init_run (h_a, h_b, h_c, d16_a, d16_b, d_c, false);
-  pass = pass && h_c[0] == ldexp(1.,-23);
+  pass = pass && h_c[0] == ldexp(1., -23);
   printpass(outfile, pass);
 
   printitem(outfile, "4) Extra bits for carry out");
@@ -385,11 +358,26 @@ int main(int argc, char** argv){
   for (i=0; i<4; i++) {
     if (i>0)
       h_b[i-1] = one16;
-    h_b[i] = __half2float(ldexp(1.,-23));
-    h_c[0] = 1. + ldexp(1.,-22) + ldexp(1.,-23);
+    h_b[i] = __float2half(ldexp(1., -23));
+    h_c[0] = 1. + ldexp(1., -22) + ldexp(1., -23);
     wmma_init_run (h_a, h_b, h_c, d16_a, d16_b, d_c, false);
-    pass = pass && h_c[0] == 4.+ldexp(1.,-21);
+    pass = pass && h_c[0] == 4. + ldexp(1., -21);
   }
+
+  // Test for the third bit
+  host_reset(h_a, h_b, h_c);
+  for (i=0; i<4; i++) {
+    h_a[i] = one16;
+    h_b[i] = one16;
+  }
+  pass = true;
+  h_b[0] = one16;
+  h_b[1] = __float2half(1.5);
+  h_b[2] = __float2half(1.75);
+  h_b[3] = __float2half(1.875);
+  h_c[0] = 1.875;
+  wmma_init_run (h_a, h_b, h_c, d16_a, d16_b, d_c, false);
+  pass = pass && h_c[0] == 8.;
 
   // Round-down in normalization of positive values.
   host_reset(h_a, h_b, h_c);
@@ -397,7 +385,7 @@ int main(int argc, char** argv){
     h_a[i] = one16;
     h_b[i] = one16;
   }
-  h_c[0] = 1. + ldexp(1.,-22) + ldexp(1.,-23);
+  h_c[0] = 1. + ldexp(1., -22) + ldexp(1., -23);
   wmma_init_run (h_a, h_b, h_c, d16_a, d16_b, d_c, false);
   pass = pass && (h_c[0] == 5.);
 
@@ -407,7 +395,7 @@ int main(int argc, char** argv){
     h_a[i] = one16;
     h_b[i] = minusone16;
   }
-  h_c[0] = -1. - ldexp(1.,-22) - ldexp(1.,-23);
+  h_c[0] = -1. - ldexp(1., -22) - ldexp(1., -23);
   wmma_init_run (h_a, h_b, h_c, d16_a, d16_b, d_c, false);
   pass = pass && (h_c[0] == -5.);
 
@@ -417,9 +405,9 @@ int main(int argc, char** argv){
   host_reset(h_a, h_b, h_c);
   for (i=0; i<4; i++) {
     h_a[i] = one16;
-    h_b[i] = ldexp(1.,-24);
+    h_b[i] = ldexp(1., -24);
   }
-  h_c[0] = 1. - ldexp(1.,-24);
+  h_c[0] = 1. - ldexp(1., -24);
   wmma_init_run (h_a, h_b, h_c, d16_a, d16_b, d_c, false);
   float partial = h_c[0];
   h_c[0] = 1.;
@@ -427,10 +415,6 @@ int main(int argc, char** argv){
   printpass(outfile, h_c[0] < partial);
 
   printfooter(outfile);
-
-
-
-
 
   // Free dynamically allocated memory.
   free(h_a);
@@ -441,5 +425,4 @@ int main(int argc, char** argv){
   cudaFree(d16_c);
   cudaFree(d_c);
   free(h_c);
-
 }
