@@ -34,9 +34,9 @@ The experiments can be compiled by issuing `make all`, which generates several e
 * `test-A100-binary16`, `test-A100-bf16`, `test-A100-tf32`, `test-A100-binary64`, for testing the four precision configurations available on Ampere GPUs (requires version 11 or newer of the CUDA platform).
 
 ### Reference
-If you use the code in this repository, please reference the preprint:
+Details about the code in this repository can be found in:
 
-Massimiliano Fasi,  Nicholas J. Higham, Mantas Mikaitis, and Srikara Pranesh. [_Numerical Behavior of the NVIDIA Tensor Cores._](http://eprints.maths.manchester.ac.uk/2784/)Technical Report 2020.10, Manchester Institute for Mathematical Sciences, The University of Manchester, UK, April 2020. *Revised October 2020*.
+Massimiliano Fasi, Nicholas J. Higham, Mantas Mikaitis, and Srikara Pranesh. [Numerical Behavior of the NVIDIA Tensor Cores](https://doi.org/10.7717/peerj-cs.330). PeerJ Computer Science 7:e330, 2021.
 
 ### License
 This software is distributed under the terms of the GNU GPL v.2 software license (see [LICENSE.md](./LICENSE.md)).
