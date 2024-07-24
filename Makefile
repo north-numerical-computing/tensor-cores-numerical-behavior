@@ -1,4 +1,4 @@
-all: tets-V100 test-T4 test-A100
+all: test-V100 test-T4 test-A100
 
 test-V100: tc_test_numerics-V100.cu
 	nvcc -o $@ -arch=sm_70 -std=c++11 $<
